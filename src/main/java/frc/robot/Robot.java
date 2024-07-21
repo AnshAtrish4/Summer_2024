@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.subsystems.Vision.DualCamera;
+import frc.robot.subsystems.Vision.StreamCamera;
 import frc.robot.subsystems.swerve.Drivebase;
 import frc.robot.subsystems.swerve.Drivebase.DriveState;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -25,7 +26,8 @@ public class Robot extends LoggedRobot {
   private static XboxController driver;
   private static XboxController operator;
 
-  private DualCamera cameraManager;
+  private DualCamera dualCamera;
+  private StreamCamera intakeCamera;
 
 
   private Command m_autoSelected;
@@ -42,12 +44,13 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotInit() {
     drivebase = Drivebase.getInstance();
-    cameraManager = DualCamera.getInstance();
+    dualCamera = DualCamera.getInstance();
+    intakeCamera = StreamCamera.getInstance();
 
     driver = new XboxController(0);
     operator = new XboxController(1);
     
-    // drivebase.resetOdometry(new Pose2d(1, 1, new Rotation2d(0)));
+   //drivebase.resetOdometry(new Pose2d(1, 1, new Rotation2d(0)));
 
 
 
@@ -62,8 +65,17 @@ public class Robot extends LoggedRobot {
 
     CommandScheduler.getInstance().run();
 
-     if (cameraManager.isBackConnected()) {
-            PhotonPipelineResult backResult = cameraManager.getBack();
+    if(intakeCamera.isIntakeCamConnected()){
+      SmartDashboard.putBoolean("IntakeCamConnected", true);
+      
+    }else{
+      SmartDashboard.putBoolean("IntakeCamConnected", false);
+    }
+
+    
+
+     if (dualCamera.isBackConnected()) {
+            PhotonPipelineResult backResult = dualCamera.getBack();
             
             if (backResult.hasTargets()) {
                 PhotonTrackedTarget target = backResult.getBestTarget();
@@ -82,8 +94,8 @@ public class Robot extends LoggedRobot {
             SmartDashboard.putString("Back Camera", "Not Connected");
         }
 
-        if (cameraManager.isFrontConnected()) {
-            PhotonPipelineResult frontResult = cameraManager.getFront();
+        if (dualCamera.isFrontConnected()) {
+            PhotonPipelineResult frontResult = dualCamera.getFront();
             if (frontResult.hasTargets()) {
                 PhotonTrackedTarget target = frontResult.getBestTarget();
                 Transform3d bestCameraToTarget = target.getBestCameraToTarget();
@@ -99,6 +111,8 @@ public class Robot extends LoggedRobot {
         } else {
             SmartDashboard.putString("Front Camera", "Not Connected");
         }
+
+        
     drivebase.periodic();
 
     SmartDashboard.putNumber("Gyro Angle:", (drivebase.getHeading() + 90) % 360);
