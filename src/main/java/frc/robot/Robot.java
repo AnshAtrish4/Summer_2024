@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
@@ -154,15 +155,21 @@ public class Robot extends LoggedRobot {
     //         SmartDashboard.putString("Front Camera", "Not Connected");
     //     }
 
+    Pose2d defaultPose = new Pose2d(0, 0, new Rotation2d(0));
+
+
         
-    drivebase.periodic();
 
     Pose2d cameraPosition = dualCamera.calculateRobotPosition();
-    SmartDashboard.putNumber("Robot X Position", cameraPosition.getX());
-    SmartDashboard.putNumber("Robot Y Position", cameraPosition.getY());
-    SmartDashboard.putNumber("Robot Heading", cameraPosition.getRotation().getDegrees());
+    SmartDashboard.putNumber("Camera X Position", cameraPosition.getX());
+    SmartDashboard.putNumber("Camera Y Position", cameraPosition.getY());
+    SmartDashboard.putNumber("Camera Heading", cameraPosition.getRotation().getDegrees());
     
-    drivebase.updateOdometry(cameraPosition);
+    if(cameraPosition!= defaultPose){
+      drivebase.updateOdometry(cameraPosition);
+    }
+
+    
     drivebase.periodic();
 
 
