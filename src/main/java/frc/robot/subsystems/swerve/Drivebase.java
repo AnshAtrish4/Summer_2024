@@ -112,6 +112,11 @@ public class Drivebase extends SubsystemBase {
     return poseEstimator.getEstimatedPosition();
   }
 
+  public void updateOdometry(Pose2d pose) {
+    // Update the odometry with a new pose
+    resetOdometry(pose);
+}
+
   // Resets the odometry to the specified pose
   public void resetOdometry(Pose2d pose) {
     poseEstimator.resetPosition(Rotation2d.fromDegrees(-gyro.getAngle()), getPositions(), pose);
