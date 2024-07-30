@@ -5,15 +5,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class DualCamera {
+    private static final Logger logger = Logger.getLogger(DualCamera.class.getName());
+
     private PhotonCamera backCamera;
     private PhotonCamera frontCamera;
 
@@ -22,12 +24,13 @@ public class DualCamera {
 
     private static DualCamera instance;
 
-    private Map<Integer, Pose2d> fiducialMap = new HashMap<>();
+    private final Map<Integer, Pose2d> fiducialMap = new HashMap<>();
 
     private DualCamera() {
         backCamera = new PhotonCamera("BackCamera");
         frontCamera = new PhotonCamera("FrontCamera");
 
+        // Initialize fiducial map
         fiducialMap.put(1, new Pose2d(593.68 / 1000, 9.68 / 1000, new Rotation2d(Math.toRadians(120))));
         fiducialMap.put(2, new Pose2d(637.21 / 1000, 34.79 / 1000, new Rotation2d(Math.toRadians(120))));
         fiducialMap.put(3, new Pose2d(652.73 / 1000, 196.17 / 1000, new Rotation2d(Math.toRadians(180))));
@@ -72,93 +75,59 @@ public class DualCamera {
     public Pose2d calculateRobotPosition() {
         PhotonPipelineResult frontResult = getFront();
         PhotonPipelineResult backResult = getBack();
-    
-        Pose2d frontRobotPose = null;
-        Pose2d backRobotPose = null;
-    
-        if (frontResult != null && frontResult.hasTargets()) {
-            PhotonTrackedTarget frontTarget = frontResult.getBestTarget();
-            Pose2d frontFiducialPose = fiducialMap.get(frontTarget.getFiducialId());
-    
-            if (frontFiducialPose != null) {
-                Transform3d frontTransform = frontTarget.getBestCameraToTarget().inverse();
-                Pose2d frontCameraToTargetPose = new Pose2d(
-                    frontTransform.getTranslation().getX(),
-                    frontTransform.getTranslation().getY(),
-                    frontTransform.getRotation().toRotation2d()
-                );
-    
-                // Convert Pose2d to Transform2d if needed
-                Transform2d frontCameraToTargetTransform = new Transform2d(
-                    new Translation2d(frontCameraToTargetPose.getX(), frontCameraToTargetPose.getY()),
-                    frontCameraToTargetPose.getRotation()
-                );
-    
-                frontRobotPose = applyTransform(
-                    applyTransform(frontFiducialPose, frontCameraToTargetTransform),
-                    frontCameraOffset
-                );
-            }
-        }
-    
-        if (backResult != null && backResult.hasTargets()) {
-            PhotonTrackedTarget backTarget = backResult.getBestTarget();
-            Pose2d backFiducialPose = fiducialMap.get(backTarget.getFiducialId());
-    
-            if (backFiducialPose != null) {
-                Transform3d backTransform = backTarget.getBestCameraToTarget().inverse();
-                Pose2d backCameraToTargetPose = new Pose2d(
-                    backTransform.getTranslation().getX(),
-                    backTransform.getTranslation().getY(),
-                    backTransform.getRotation().toRotation2d()
-                );
-    
-                // Convert Pose2d to Transform2d if needed
-                Transform2d backCameraToTargetTransform = new Transform2d(
-                    new Translation2d(backCameraToTargetPose.getX(), backCameraToTargetPose.getY()),
-                    backCameraToTargetPose.getRotation()
-                );
-    
-                backRobotPose = applyTransform(
-                    applyTransform(backFiducialPose, backCameraToTargetTransform),
-                    backCameraOffset
-                );
-            }
-        }
-    
+
+        Pose2d frontRobotPose = calculatePoseFromCameraResult(frontResult, frontCameraOffset);
+        Pose2d backRobotPose = calculatePoseFromCameraResult(backResult, backCameraOffset);
+
         if (frontRobotPose != null && backRobotPose != null) {
             double avgX = (frontRobotPose.getX() + backRobotPose.getX()) / 2;
             double avgY = (frontRobotPose.getY() + backRobotPose.getY()) / 2;
             Rotation2d avgRotation = new Rotation2d(
                 (frontRobotPose.getRotation().getRadians() + backRobotPose.getRotation().getRadians()) / 2
             );
-    
+
             return new Pose2d(avgX, avgY, avgRotation);
         }
-    
-        if (frontRobotPose != null) {
-            return frontRobotPose;
+
+        return frontRobotPose != null ? frontRobotPose : backRobotPose != null ? backRobotPose : new Pose2d();
+    }
+
+    private Pose2d calculatePoseFromCameraResult(PhotonPipelineResult result, Transform2d cameraOffset) {
+        if (result != null && result.hasTargets()) {
+            PhotonTrackedTarget target = result.getBestTarget();
+            Pose2d fiducialPose = fiducialMap.get(target.getFiducialId());
+
+            if (fiducialPose != null) {
+                Transform3d transform = target.getBestCameraToTarget().inverse();
+                Pose2d cameraToTargetPose = new Pose2d(
+                    transform.getTranslation().getX(),
+                    transform.getTranslation().getY(),
+                    transform.getRotation().toRotation2d()
+                );
+
+                Transform2d cameraToTargetTransform = new Transform2d(
+                    new Translation2d(cameraToTargetPose.getX(), cameraToTargetPose.getY()),
+                    cameraToTargetPose.getRotation()
+                );
+
+                return applyTransform(
+                    applyTransform(fiducialPose, cameraToTargetTransform),
+                    cameraOffset
+                );
+            }
         }
-        if (backRobotPose != null) {
-            return backRobotPose;
-        }
-    
-        return new Pose2d();
+        return null;
     }
 
     private Pose2d applyTransform(Pose2d pose, Transform2d transform) {
-        // Extract translation and rotation from the transform
         Translation2d transformTranslation = transform.getTranslation();
         Rotation2d transformRotation = transform.getRotation();
-    
-        // Apply rotation to the translation
+
         Translation2d rotatedTranslation = transformTranslation.rotateBy(pose.getRotation());
-    
-        // Calculate new pose
+
         Translation2d newTranslation = pose.getTranslation().plus(rotatedTranslation);
         Rotation2d newRotation = pose.getRotation().plus(transformRotation);
-    
+
         return new Pose2d(newTranslation, newRotation);
     }
-    
 }
