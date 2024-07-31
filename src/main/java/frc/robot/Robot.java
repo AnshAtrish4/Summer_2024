@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.subsystems.Vision.DualCamera;
 import frc.robot.subsystems.Vision.StreamCamera;
+import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.swerve.Drivebase;
 import frc.robot.subsystems.swerve.Drivebase.DriveState;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -23,6 +24,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 public class Robot extends LoggedRobot {
 
   private Drivebase drivebase;
+  private Launcher launcher;
 
 
   private static XboxController driver;
@@ -46,6 +48,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotInit() {
     drivebase = Drivebase.getInstance();
+    launcher = Launcher.getInstance();
     dualCamera = DualCamera.getInstance();
     intakeCamera = StreamCamera.getInstance();
 
@@ -246,6 +249,32 @@ public class Robot extends LoggedRobot {
     if (driver.getRightTriggerAxis() > 0) {
       drivebase.setDriveState(DriveState.SLOW);
     }
+
+    if (operator.getPOV() == 270) {
+      if (dualCamera.isFrontConnected()) {
+          PhotonPipelineResult frontResult = dualCamera.getFront();
+          if (frontResult.hasTargets()) {
+              PhotonTrackedTarget frontTarget = frontResult.getBestTarget();
+              Transform3d frontTransform = frontTarget.getBestCameraToTarget();
+              double frontDistance = frontTransform.getTranslation().getNorm();
+              int id = frontTarget.getFiducialId(); // Get the fiducial ID from the detected tag
+              
+              String alliance = DriverStation.getAlliance().toString();
+              
+              // Ensure alliance comparison is done using .equals for string comparison
+              if (alliance.equals("RED")) {
+                  if (id == 4) {
+                      launcher.adjustLauncherForDetectedTag(frontDistance);
+                  }
+              } else if (alliance.equals("BLUE")) {
+                  if (id == 7) {
+                      launcher.adjustLauncherForDetectedTag(frontDistance);
+                  }
+              }
+          }
+      }
+  }
+  
   }
 
   @Override
