@@ -162,6 +162,7 @@ public class Robot extends LoggedRobot {
 
     Pose2d cameraPosition = dualCamera.calculateRobotPosition();
     SmartDashboard.putNumber("Camera X Position", cameraPosition.getX());
+    SmartDashboard.putNumber("CameraX local", 14.5-cameraPosition.getX());
     SmartDashboard.putNumber("Camera Y Position", cameraPosition.getY());
     SmartDashboard.putNumber("Camera Heading", cameraPosition.getRotation().getDegrees());
     
