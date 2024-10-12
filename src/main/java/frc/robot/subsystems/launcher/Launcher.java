@@ -8,10 +8,9 @@ import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
-import com.revrobotics.CANSparkMax.FaultID;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -81,11 +80,12 @@ public class Launcher {
 
     private SparkMaxPIDController lebronController;
 
-    private static RelativeEncoder encoder;
+    private static AbsoluteEncoder encoder;
 
     private static RelativeEncoder boxScore;
-
     private boolean[] connections = new boolean[8];
+
+
 
     private static LauncherState launchState = LauncherState.START;
     private static LeBronTeam leBronTeam = LeBronTeam.CAVS;
@@ -141,15 +141,18 @@ public class Launcher {
 
         lebronFeedForward = new ArmFeedforward(0, 0, 0);
 
-        encoder = pivotMotor.getEncoder();
-
+        
         pivotController1 = pivotMotor.getPIDController();
+        encoder = pivotMotor.getAbsoluteEncoder(Type.kDutyCycle);
+        pivotController1.setFeedbackDevice(encoder);
 
         pivotController1.setP(LauncherConstants.pivotPCoefficient);
         pivotController1.setI(LauncherConstants.pivotICoefficient);
         pivotController1.setD(LauncherConstants.pivotDCoefficient);
 
-        pivotController1.setFeedbackDevice(encoder);
+        encoder.setPositionConversionFactor(1.0);  //  modify this conversion factor based on your setup
+        encoder.setInverted(false);  // Set this based on your encoder setup
+        
 
         pivotController1.setOutputRange(-1, 1);
 
@@ -183,10 +186,20 @@ public class Launcher {
     }
 
     public void updatePose() {
+        // Clamp the desired position between the minimum and maximum positions
         double clampedPosition = MathUtil.clamp(launchState.position, MIN_POSITION, MAX_POSITION);
-        pivotController1.setReference(clampedPosition, CANSparkMax.ControlType.kPosition, 0,
+        
+        // Define a deadzone threshold (tune this value based on your system's sensitivity)
+        double DEADZONE = 0.05; 
+    
+        // Check if the difference between the encoder's current position and the clamped desired position is larger than the deadzone
+        if (Math.abs(encoder.getPosition() - clampedPosition) > DEADZONE) {
+            // Only set motor reference if the position difference exceeds the deadzone
+            pivotController1.setReference(clampedPosition, CANSparkMax.ControlType.kPosition, 0,
                 feedForward.calculate(encoder.getPosition(), 0));
+        }
     }
+    
 
     public void moveLeBron() {
         lebronController.setReference(leBronTeam.position, CANSparkMax.ControlType.kPosition, 0,
@@ -287,7 +300,7 @@ public class Launcher {
     }
 
     public void setPosition(double position) {
-        encoder.setPosition(position);
+        encoder.getPosition();
     }
 
     public double getLeBronAngle() {
