@@ -8,6 +8,7 @@ import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
@@ -72,6 +73,8 @@ public class Launcher {
     private CANSparkMax lebronMotor;
 
     private double increment = 1.0;
+
+    private ElevatorFeedforward eFeedforward;
 
     private ArmFeedforward feedForward;
     private ArmFeedforward lebronFeedForward;

@@ -15,6 +15,7 @@ import frc.robot.subsystems.Vision.DualCamera;
 import frc.robot.subsystems.Vision.StreamCamera;
 import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.swerve.Drivebase;
+import frc.robot.subsystems.Claw.Claw;
 import frc.robot.subsystems.swerve.Drivebase.DriveState;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -26,6 +27,7 @@ public class Robot extends LoggedRobot {
 
   private Drivebase drivebase;
   private Launcher launcher;
+  private Claw claw;
 
 
   private static XboxController driver;
@@ -52,6 +54,7 @@ public class Robot extends LoggedRobot {
     launcher = Launcher.getInstance();
     dualCamera = DualCamera.getInstance();
     intakeCamera = StreamCamera.getInstance();
+    claw = Claw.getInstance();
 
     driver = new XboxController(0);
     operator = new XboxController(1);
@@ -110,6 +113,16 @@ public class Robot extends LoggedRobot {
   } else if(dualCamera.isBackConnected() == false) {
       SmartDashboard.putString("Back Camera", "Not Connected");
   }
+
+    SmartDashboard.putNumber("CRF", claw.cylinderR.getFwdChannel());
+    SmartDashboard.putNumber("CRR", claw.cylinderR.getRevChannel());
+    SmartDashboard.putNumber("CLF", claw.cylinderL.getFwdChannel());
+    SmartDashboard.putNumber("CLR", claw.cylinderL.getRevChannel());
+
+            
+
+
+
 
     // if(intakeCamera.isIntakeCamConnected()){
     //   SmartDashboard.putBoolean("IntakeCamConnected", true);
