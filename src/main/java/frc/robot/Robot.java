@@ -118,6 +118,7 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putNumber("CRR", claw.cylinderR.getRevChannel());
     SmartDashboard.putNumber("CLF", claw.cylinderL.getFwdChannel());
     SmartDashboard.putNumber("CLR", claw.cylinderL.getRevChannel());
+    SmartDashboard.putBoolean("Compressor enabled?", claw.isCompressorEnabled());
 
             
 
@@ -189,6 +190,12 @@ public class Robot extends LoggedRobot {
 
     
     drivebase.periodic();
+
+    if (isEnabled()) {
+      claw.enableCompressor();  // Turn on the compressor when robot is enabled
+  } else {
+      claw.disableCompressor(); // Turn off the compressor when robot is disabled
+  }
 
 
     SmartDashboard.putNumber("Gyro Angle:", (drivebase.getHeading() + 90) % 360);
@@ -264,35 +271,44 @@ public class Robot extends LoggedRobot {
       drivebase.setDriveState(DriveState.SLOW);
     }
 
-    if (operator.getPOV() == 270) {
-      if (dualCamera.isFrontConnected()) {
-          PhotonPipelineResult frontResult = dualCamera.getFront();
-          if (frontResult.hasTargets()) {
-              PhotonTrackedTarget frontTarget = frontResult.getBestTarget();
-              Transform3d frontTransform = frontTarget.getBestCameraToTarget();
-              double frontDistance = frontTransform.getTranslation().getNorm();
-              int id = frontTarget.getFiducialId(); // Get the fiducial ID from the detected tag
+  //   if (operator.getPOV() == 270) {
+  //     if (dualCamera.isFrontConnected()) {
+  //         PhotonPipelineResult frontResult = dualCamera.getFront();
+  //         if (frontResult.hasTargets()) {
+  //             PhotonTrackedTarget frontTarget = frontResult.getBestTarget();
+  //             Transform3d frontTransform = frontTarget.getBestCameraToTarget();
+  //             double frontDistance = frontTransform.getTranslation().getNorm();
+  //             int id = frontTarget.getFiducialId(); // Get the fiducial ID from the detected tag
               
-              String alliance = DriverStation.getAlliance().toString();
+  //             String alliance = DriverStation.getAlliance().toString();
               
-              // Ensure alliance comparison is done using .equals for string comparison
-              if (alliance.equals("RED")) {
-                  if (id == 4) {
-                      launcher.adjustLauncherForDetectedTag(frontDistance);
-                  }
-              } else if (alliance.equals("BLUE")) {
-                  if (id == 7) {
-                      launcher.adjustLauncherForDetectedTag(frontDistance);
-                  }
-              }
-          }
-      }
+  //             // Ensure alliance comparison is done using .equals for string comparison
+  //             if (alliance.equals("RED")) {
+  //                 if (id == 4) {
+  //                     launcher.adjustLauncherForDetectedTag(frontDistance);
+  //                 }
+  //             } else if (alliance.equals("BLUE")) {
+  //                 if (id == 7) {
+  //                     launcher.adjustLauncherForDetectedTag(frontDistance);
+  //                 }
+  //             }
+  //         }
+  //     }
+  // }
+
+  if (driver.getRightBumper()){
+    claw.extendCylinders();
+  }else if (driver.getLeftBumper()){
+    claw.retractCylinders();
   }
   
   }
 
   @Override
   public void disabledInit() {
+
+    claw.disableCompressor();
+
   }
 
   @Override

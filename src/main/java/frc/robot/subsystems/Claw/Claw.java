@@ -20,7 +20,6 @@ public class Claw {
  
 
     
-    public PneumaticHub junoHub;
     public DoubleSolenoid cylinderR;
     public DoubleSolenoid cylinderL;
     public  Compressor compressor;
@@ -45,13 +44,22 @@ public class Claw {
 
          // Initialize compressor and solenoids (assuming PCM module and double solenoids)
          compressor = new Compressor(PneumaticsModuleType.REVPH);
-         cylinderR = new DoubleSolenoid(PneumaticsModuleType.REVPH, 15, 13); // PCM channels 0, 1
-         cylinderL = new DoubleSolenoid(PneumaticsModuleType.REVPH, 14, 12); // PCM channels 2, 3
+         cylinderR = new DoubleSolenoid(PneumaticsModuleType.REVPH, 13, 15); // PCM channels 0, 1
+         cylinderL = new DoubleSolenoid(PneumaticsModuleType.REVPH, 12, 14); // PCM channels 2, 3
 
-         compressor.enableAnalog(10, 100);
-         retractCylinders();
     }
 
+    public void enableCompressor() {
+        if (!compressor.isEnabled()) {
+            compressor.enableAnalog(10, 100); // Enable compressor with the desired pressure range
+        }
+    }
+    
+    public void disableCompressor() {
+        if (compressor.isEnabled()) {
+            compressor.disable(); // Stop compressor if it's running
+        }
+    }
     public void setWheelsOn(){
         wheel1.set(.75);
         wheel2.set(.75);
@@ -67,12 +75,6 @@ public class Claw {
         wheel2.set(0.05);
     }
 
-
-    // Method to turn on compressor (already handled by enableDigital in constructor)
-    public void turnOnCompressor() {
-        compressor.enableAnalog(10, 100);  // Compressor will automatically manage itself
-    }
-
     // Method to extend both cylinders
     public void extendCylinders() {
         cylinderR.set(DoubleSolenoid.Value.kForward); // Extend right cylinder
@@ -85,20 +87,24 @@ public class Claw {
         cylinderL.set(DoubleSolenoid.Value.kReverse); // Retract left cylinder
     }
 
-    // public void getSolLNumberF(){
-    //     cylinderL.getFwdChannel();
-    // }
+    public boolean isCompressorEnabled() {
+        return compressor.isEnabled();
+    }
 
-    // public void getSolLNumberR(){
-    //     cylinderL.getRevChannel();
-    // }
+    public void getSolLNumberF(){
+        cylinderL.getFwdChannel();
+    }
 
-    //  public void getSolRNumberF(){
-    //     cylinderR.getFwdChannel();    }
+    public void getSolLNumberR(){
+        cylinderL.getRevChannel();
+    }
 
-    //  public void getSolRNumberR(){
-    //     cylinderR.getRevChannel();
-    // }
+     public void getSolRNumberF(){
+        cylinderR.getFwdChannel();    }
+
+     public void getSolRNumberR(){
+        cylinderR.getRevChannel();
+    }
 
 
     public static Claw getInstance() {
