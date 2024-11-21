@@ -16,6 +16,7 @@ import frc.robot.subsystems.Vision.StreamCamera;
 import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.swerve.Drivebase;
 import frc.robot.subsystems.Claw.Claw;
+import frc.robot.subsystems.Elevator.elevator;
 import frc.robot.subsystems.swerve.Drivebase.DriveState;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -26,6 +27,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 public class Robot extends LoggedRobot {
 
   private Drivebase drivebase;
+  private elevator Elevator;;
   private Launcher launcher;
   private Claw claw;
 
@@ -54,6 +56,7 @@ public class Robot extends LoggedRobot {
     launcher = Launcher.getInstance();
     dualCamera = DualCamera.getInstance();
     intakeCamera = StreamCamera.getInstance();
+    Elevator = elevator.getInstance();
     claw = Claw.getInstance();
 
     driver = new XboxController(0);
@@ -119,6 +122,11 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putNumber("CLF", claw.cylinderL.getFwdChannel());
     SmartDashboard.putNumber("CLR", claw.cylinderL.getRevChannel());
     SmartDashboard.putBoolean("Compressor enabled?", claw.isCompressorEnabled());
+
+    SmartDashboard.putNumber("Absolute Encoder", Elevator.getCumulativePosition() );
+    SmartDashboard.putNumber("Raw Encoder Position", Elevator.encoderA.getPosition());
+    SmartDashboard.putNumber("Cumulative Position", Elevator.getCumulativePosition());
+
 
             
 
