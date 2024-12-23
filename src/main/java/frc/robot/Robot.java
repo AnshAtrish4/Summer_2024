@@ -12,15 +12,15 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.subsystems.Vision.DualCamera;
-import frc.robot.subsystems.Vision.StreamCamera;
+// import frc.robot.subsystems.Vision.StreamCamera;
 import frc.robot.subsystems.launcher.Launcher;
 import frc.robot.subsystems.swerve.Drivebase;
 import frc.robot.subsystems.Claw.Claw;
 import frc.robot.subsystems.Elevator.elevator;
 import frc.robot.subsystems.swerve.Drivebase.DriveState;
 import org.littletonrobotics.junction.LoggedRobot;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
+// import org.photonvision.targeting.PhotonPipelineResult;
+// import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.pathplanner.lib.commands.PathPlannerAuto; 
 
@@ -36,7 +36,7 @@ public class Robot extends LoggedRobot {
   private static XboxController operator;
 
   private DualCamera dualCamera;
-  private StreamCamera intakeCamera;
+  // private StreamCamera intakeCamera;
 
 
   private Command m_autoSelected;
@@ -55,7 +55,7 @@ public class Robot extends LoggedRobot {
     drivebase = Drivebase.getInstance();
     launcher = Launcher.getInstance();
     dualCamera = DualCamera.getInstance();
-    intakeCamera = StreamCamera.getInstance();
+    // intakeCamera = StreamCamera.getInstance();
     Elevator = elevator.getInstance();
     claw = Claw.getInstance();
 
@@ -77,45 +77,45 @@ public class Robot extends LoggedRobot {
 
     CommandScheduler.getInstance().run();
 
-    if (dualCamera.isFrontConnected()) {
-      SmartDashboard.putString("Front Camera", "Connected");
-      PhotonPipelineResult frontResult = dualCamera.getFront();
-      if (frontResult.hasTargets()) {
-          SmartDashboard.putString("Front Camera Target", "Targets Spotted");
-          PhotonTrackedTarget frontTarget = frontResult.getBestTarget();
-          Transform3d frontTransform = frontTarget.getBestCameraToTarget();
-          double frontDistance = frontTransform.getTranslation().getNorm();
-          double frontYaw = frontTarget.getYaw();
-          int frontFiducialId = frontTarget.getFiducialId();
-          SmartDashboard.putNumber("Front Camera Distance", frontDistance);
-          SmartDashboard.putNumber("Front Camera Yaw", frontYaw);
-          SmartDashboard.putNumber("Front Camera Fiducial ID", frontFiducialId);
-      } else if (frontResult.hasTargets() == false){
-          SmartDashboard.putString("Front Camera Target", "No Targets");
-      }
-  } else if(dualCamera.isFrontConnected() == false) {
-      SmartDashboard.putString("Front Camera", "Not Connected");
-  }
+  //   if (dualCamera.isFrontConnected()) {
+  //     SmartDashboard.putString("Front Camera", "Connected");
+  //     PhotonPipelineResult frontResult = dualCamera.getFront();
+  //     if (frontResult.hasTargets()) {
+  //         SmartDashboard.putString("Front Camera Target", "Targets Spotted");
+  //         PhotonTrackedTarget frontTarget = frontResult.getBestTarget();
+  //         Transform3d frontTransform = frontTarget.getBestCameraToTarget();
+  //         double frontDistance = frontTransform.getTranslation().getNorm();
+  //         double frontYaw = frontTarget.getYaw();
+  //         int frontFiducialId = frontTarget.getFiducialId();
+  //         SmartDashboard.putNumber("Front Camera Distance", frontDistance);
+  //         SmartDashboard.putNumber("Front Camera Yaw", frontYaw);
+  //         SmartDashboard.putNumber("Front Camera Fiducial ID", frontFiducialId);
+  //     } else if (frontResult.hasTargets() == false){
+  //         SmartDashboard.putString("Front Camera Target", "No Targets");
+  //     }
+  // } else if(dualCamera.isFrontConnected() == false) {
+  //     SmartDashboard.putString("Front Camera", "Not Connected");
+  // }
 
-  if (dualCamera.isBackConnected()) {
-      PhotonPipelineResult backResult = dualCamera.getBack();
-      SmartDashboard.putString("Back Camera", "Connected");
-      if (backResult.hasTargets()) {
-          SmartDashboard.putString("Back Camera Target", "Targets Spotted");
-          PhotonTrackedTarget backTarget = backResult.getBestTarget();
-          Transform3d backTransform = backTarget.getBestCameraToTarget();
-          double backDistance = backTransform.getTranslation().getNorm();
-          double backYaw = backTarget.getYaw();
-          int backFiducialId = backTarget.getFiducialId();
-          SmartDashboard.putNumber("Back Camera Distance", backDistance);
-          SmartDashboard.putNumber("Back Camera Yaw", backYaw);
-          SmartDashboard.putNumber("Back Camera Fiducial ID", backFiducialId);
-      } else if(backResult.hasTargets() == false) {
-          SmartDashboard.putString("Back Camera Target", "No Targets");
-      }
-  } else if(dualCamera.isBackConnected() == false) {
-      SmartDashboard.putString("Back Camera", "Not Connected");
-  }
+  // if (dualCamera.isBackConnected()) {
+  //     PhotonPipelineResult backResult = dualCamera.getBack();
+  //     SmartDashboard.putString("Back Camera", "Connected");
+  //     if (backResult.hasTargets()) {
+  //         SmartDashboard.putString("Back Camera Target", "Targets Spotted");
+  //         PhotonTrackedTarget backTarget = backResult.getBestTarget();
+  //         Transform3d backTransform = backTarget.getBestCameraToTarget();
+  //         double backDistance = backTransform.getTranslation().getNorm();
+  //         double backYaw = backTarget.getYaw();
+  //         int backFiducialId = backTarget.getFiducialId();
+  //         SmartDashboard.putNumber("Back Camera Distance", backDistance);
+  //         SmartDashboard.putNumber("Back Camera Yaw", backYaw);
+  //         SmartDashboard.putNumber("Back Camera Fiducial ID", backFiducialId);
+  //     } else if(backResult.hasTargets() == false) {
+  //         SmartDashboard.putString("Back Camera Target", "No Targets");
+  //     }
+  // } else if(dualCamera.isBackConnected() == false) {
+  //     SmartDashboard.putString("Back Camera", "Not Connected");
+  // }
 
     SmartDashboard.putNumber("CRF", claw.cylinderR.getFwdChannel());
     SmartDashboard.putNumber("CRR", claw.cylinderR.getRevChannel());
@@ -123,9 +123,9 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putNumber("CLR", claw.cylinderL.getRevChannel());
     SmartDashboard.putBoolean("Compressor enabled?", claw.isCompressorEnabled());
 
-    SmartDashboard.putNumber("Absolute Encoder", Elevator.getCumulativePosition() );
-    SmartDashboard.putNumber("Raw Encoder Position", Elevator.encoderA.getPosition());
-    SmartDashboard.putNumber("Cumulative Position", Elevator.getCumulativePosition());
+    // SmartDashboard.putNumber("Absolute Encoder", Elevator.getCumulativePosition() );
+    // SmartDashboard.putNumber("Raw Encoder Position", Elevator.encoderA.getPosition());
+    // SmartDashboard.putNumber("Cumulative Position", Elevator.getCumulativePosition());
 
 
             
@@ -186,15 +186,15 @@ public class Robot extends LoggedRobot {
 
         
 
-    Pose2d cameraPosition = dualCamera.calculateRobotPosition();
-    SmartDashboard.putNumber("Camera X Position", cameraPosition.getX());
-    SmartDashboard.putNumber("CameraX local", 14.5-cameraPosition.getX());
-    SmartDashboard.putNumber("Camera Y Position", cameraPosition.getY());
-    SmartDashboard.putNumber("Camera Heading", cameraPosition.getRotation().getDegrees());
+    // Pose2d cameraPosition = dualCamera.calculateRobotPosition();
+    // SmartDashboard.putNumber("Camera X Position", cameraPosition.getX());
+    // SmartDashboard.putNumber("CameraX local", 14.5-cameraPosition.getX());
+    // SmartDashboard.putNumber("Camera Y Position", cameraPosition.getY());
+    // SmartDashboard.putNumber("Camera Heading", cameraPosition.getRotation().getDegrees());
     
-    if(cameraPosition!= defaultPose){
-      drivebase.updateOdometry(cameraPosition);
-    }
+    // if(cameraPosition!= defaultPose){
+    //   drivebase.updateOdometry(cameraPosition);
+    // }
 
     
     drivebase.periodic();

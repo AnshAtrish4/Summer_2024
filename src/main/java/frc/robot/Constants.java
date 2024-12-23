@@ -164,6 +164,14 @@ public final class Constants {
     public static final double lebronDCoefficient = 0.0;
   }
 
+  public static final class ElevatorConstants {
+    public static final double elevatorPCoefficient = 1.1;
+    public static final double elevatorICoefficient = 0.0;
+    public static final double elevatorDCoefficient = .25;
+
+   
+  }
+
   public static final class IntakeConstants {
     public static final double flipperPCoefficient = 0.06;
     public static final double flipperICoefficient = 0.0;
@@ -172,6 +180,7 @@ public final class Constants {
     // prototype numbers:
     // P: .1 I: 0 D: 0
 
+    
   }
 
 }

@@ -6,9 +6,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
+// import org.photonvision.PhotonCamera;
+// import org.photonvision.targeting.PhotonPipelineResult;
+// import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +20,8 @@ import java.util.logging.Logger;
 public class DualCamera {
     private static final Logger logger = Logger.getLogger(DualCamera.class.getName());
 
-    private final PhotonCamera backCamera;
-    private final PhotonCamera frontCamera;
+    // private final PhotonCamera backCamera;
+    // private final PhotonCamera frontCamera;
 
     // Define camera offsets in 3D
     private static final Transform3d FRONT_CAMERA_OFFSET = new Transform3d(
@@ -36,8 +36,8 @@ public class DualCamera {
     private final Map<Integer, Pose3d> fiducialMap = new HashMap<>();
 
     private DualCamera() {
-        backCamera = new PhotonCamera("BackCam");
-        frontCamera = new PhotonCamera("FrontCam");
+        // backCamera = new PhotonCamera("BackCam");
+        // frontCamera = new PhotonCamera("FrontCam");
 
         double inchesToMeters = 0.0254;
 
@@ -52,81 +52,81 @@ public class DualCamera {
         return instance;
     }
 
-    public PhotonPipelineResult getBack() {
-        return backCamera.getLatestResult();
-    }
+    // public PhotonPipelineResult getBack() {
+    //     return backCamera.getLatestResult();
+    // }
 
 
-    public PhotonPipelineResult getFront() {
-        return frontCamera.getLatestResult();
-    }
+    // public PhotonPipelineResult getFront() {
+    //     return frontCamera.getLatestResult();
+    // }
 
-    public PhotonPipelineResult getBackCameraResult() {
-        return backCamera.getLatestResult();
-    }
+    // public PhotonPipelineResult getBackCameraResult() {
+    //     return backCamera.getLatestResult();
+    // }
 
-    public PhotonPipelineResult getFrontCameraResult() {
-        return frontCamera.getLatestResult();
-    }
+    // public PhotonPipelineResult getFrontCameraResult() {
+    //     return frontCamera.getLatestResult();
+    // }
 
-    public boolean isBackConnected() {
-        return backCamera.isConnected();
-    }
+    // public boolean isBackConnected() {
+    //     return backCamera.isConnected();
+    // }
 
-    public boolean isFrontConnected() {
-        return frontCamera.isConnected();
-    }
+    // public boolean isFrontConnected() {
+    //     return frontCamera.isConnected();
+    // }
 
     /**
      * Calculates the robot's position and orientation as Pose2d using 3D camera data.
      *
      * @return Pose2d representing the robot's position and orientation.
      */
-    public Pose2d calculateRobotPosition() {
-        Pose3d frontRobotPose = calculatePoseFromCameraResult(getFrontCameraResult(), FRONT_CAMERA_OFFSET);
-        Pose3d backRobotPose = calculatePoseFromCameraResult(getBackCameraResult(), BACK_CAMERA_OFFSET);
+    // public Pose2d calculateRobotPosition() {
+    //     Pose3d frontRobotPose = calculatePoseFromCameraResult(getFrontCameraResult(), FRONT_CAMERA_OFFSET);
+    //     Pose3d backRobotPose = calculatePoseFromCameraResult(getBackCameraResult(), BACK_CAMERA_OFFSET);
 
-        if (frontRobotPose != null && backRobotPose != null) {
-            // Average X, Y, and Z from both camera results
-            double avgX = (frontRobotPose.getX() + backRobotPose.getX()) / 2;
-            double avgY = (frontRobotPose.getY() + backRobotPose.getY()) / 2;
-            // We can ignore Z for Pose2d
-            Rotation3d avgRotation = new Rotation3d(
-                (frontRobotPose.getRotation().getX() + backRobotPose.getRotation().getX()) / 2,
-                (frontRobotPose.getRotation().getY() + backRobotPose.getRotation().getY()) / 2,
-                (frontRobotPose.getRotation().getZ() + backRobotPose.getRotation().getZ()) / 2
-            );
+    //     if (frontRobotPose != null && backRobotPose != null) {
+    //         // Average X, Y, and Z from both camera results
+    //         double avgX = (frontRobotPose.getX() + backRobotPose.getX()) / 2;
+    //         double avgY = (frontRobotPose.getY() + backRobotPose.getY()) / 2;
+    //         // We can ignore Z for Pose2d
+    //         Rotation3d avgRotation = new Rotation3d(
+    //             (frontRobotPose.getRotation().getX() + backRobotPose.getRotation().getX()) / 2,
+    //             (frontRobotPose.getRotation().getY() + backRobotPose.getRotation().getY()) / 2,
+    //             (frontRobotPose.getRotation().getZ() + backRobotPose.getRotation().getZ()) / 2
+    //         );
 
-            // Convert the 3D Pose to 2D Pose
-            return new Pose2d(avgX, avgY, new Rotation2d(avgRotation.getZ()));
-        }
+    //         // Convert the 3D Pose to 2D Pose
+    //         return new Pose2d(avgX, avgY, new Rotation2d(avgRotation.getZ()));
+    //     }
 
-        // Return the Pose2d with available data, or a default Pose2d if none is available
-        return frontRobotPose != null ? new Pose2d(frontRobotPose.getX(), frontRobotPose.getY(), new Rotation2d(frontRobotPose.getRotation().getZ())) :
-               backRobotPose != null ? new Pose2d(backRobotPose.getX(), backRobotPose.getY(), new Rotation2d(backRobotPose.getRotation().getZ())) :
-               new Pose2d();
-    }
+    //     // Return the Pose2d with available data, or a default Pose2d if none is available
+    //     return frontRobotPose != null ? new Pose2d(frontRobotPose.getX(), frontRobotPose.getY(), new Rotation2d(frontRobotPose.getRotation().getZ())) :
+    //            backRobotPose != null ? new Pose2d(backRobotPose.getX(), backRobotPose.getY(), new Rotation2d(backRobotPose.getRotation().getZ())) :
+    //            new Pose2d();
+    // }
 
-    private Pose3d calculatePoseFromCameraResult(PhotonPipelineResult result, Transform3d cameraOffset) {
-        if (result != null && result.hasTargets()) {
-            PhotonTrackedTarget target = result.getBestTarget();
-            Pose3d fiducialPose = fiducialMap.get(target.getFiducialId());
+    // private Pose3d calculatePoseFromCameraResult(PhotonPipelineResult result, Transform3d cameraOffset) {
+    //     if (result != null && result.hasTargets()) {
+    //         PhotonTrackedTarget target = result.getBestTarget();
+    //         Pose3d fiducialPose = fiducialMap.get(target.getFiducialId());
 
-            if (fiducialPose != null) {
-                Transform3d transform = target.getBestCameraToTarget().inverse();
-                Pose3d cameraToTargetPose = fiducialPose.transformBy(transform);
+    //         if (fiducialPose != null) {
+    //             Transform3d transform = target.getBestCameraToTarget().inverse();
+    //             Pose3d cameraToTargetPose = fiducialPose.transformBy(transform);
 
-                Pose3d robotPose3d = cameraToTargetPose.transformBy(cameraOffset);
-                return new Pose3d(
-                    robotPose3d.getX(),
-                    robotPose3d.getY(),
-                    robotPose3d.getZ(),
-                    robotPose3d.getRotation()
-                );
-            }
-        }
-        return null;
-    }
+    //             Pose3d robotPose3d = cameraToTargetPose.transformBy(cameraOffset);
+    //             return new Pose3d(
+    //                 robotPose3d.getX(),
+    //                 robotPose3d.getY(),
+    //                 robotPose3d.getZ(),
+    //                 robotPose3d.getRotation()
+    //             );
+    //         }
+    //     }
+    //     return null;
+    // }
 
     private void initializeFiducialMap(double inchesToMeters) {
         fiducialMap.put(1, new Pose3d(593.68 * inchesToMeters, 9.68 * inchesToMeters, 53.38 * inchesToMeters, new Rotation3d(0.0, 0.0, Math.toRadians(120))));
