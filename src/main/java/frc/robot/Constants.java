@@ -169,6 +169,10 @@ public final class Constants {
     public static final double elevatorICoefficient = 0.0;
     public static final double elevatorDCoefficient = .25;
 
+    public static final double maxVelocity = 2.0;
+    public static final double maxAcceleration = 1.0;
+    public static final double positionTolerance = 1.0;
+
    
   }
 
