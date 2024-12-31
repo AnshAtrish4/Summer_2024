@@ -9,30 +9,31 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
-import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.SparkAbsoluteEncoder.Type;
+import com.revrobotics.SparkPIDController;
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkFlex;
 import com.revrobotics.RelativeEncoder;
 
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 
 public class SwerveModule {
-        private final CANSparkMax drivingSparkMax;
+        private final CANSparkFlex drivingSparkMax;
         private final CANSparkMax steerSparkMax;
 
         private final RelativeEncoder drivingEncoder;
         private final AbsoluteEncoder turningEncoder;
 
-        private final SparkMaxPIDController veloPIDController;
-        private final SparkMaxPIDController anglePIDController;
+        private final SparkPIDController veloPIDController;
+        private final SparkPIDController anglePIDController;
 
         private double chassisAngularOffset = 0;
         private SwerveModuleState desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
         public SwerveModule(int drivingCANId, int turningCANId, double newChassisAngularOffset, boolean invert) {
-                drivingSparkMax = new CANSparkMax(drivingCANId, MotorType.kBrushless);
+                drivingSparkMax = new CANSparkFlex(drivingCANId, MotorType.kBrushless);
                 steerSparkMax = new CANSparkMax(turningCANId, MotorType.kBrushless);
 
                 // Factory reset, so we get the SPARKS MAX to a known state before configuring
@@ -44,6 +45,7 @@ public class SwerveModule {
                 drivingEncoder = drivingSparkMax.getEncoder();
                 turningEncoder = steerSparkMax.getAbsoluteEncoder(Type.kDutyCycle);
                 veloPIDController = drivingSparkMax.getPIDController();
+
                 anglePIDController = steerSparkMax.getPIDController();
                 veloPIDController.setFeedbackDevice(drivingEncoder);
                 anglePIDController.setFeedbackDevice(turningEncoder);
@@ -191,7 +193,7 @@ public class SwerveModule {
 
                 // Command driving and turning SPARKS MAX towards their respective setpoints.
                 veloPIDController.setReference(optimizedDesiredState.speedMetersPerSecond,
-                                CANSparkMax.ControlType.kVelocity);
+                                CANSparkFlex.ControlType.kVelocity);
                 
                 anglePIDController.setReference(optimizedDesiredState.angle.getRadians(),
                                 CANSparkMax.ControlType.kPosition);
