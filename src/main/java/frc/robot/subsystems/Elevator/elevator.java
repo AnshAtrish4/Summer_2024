@@ -70,18 +70,67 @@ public class elevator {
         profiledPIDControllerL.setGoal(elevatorState.position);
         profiledPIDControllerR.setGoal(elevatorState.position);
 
+        
+
         // Get the PID controller output for both motors
         double pidOutputL = profiledPIDControllerL.calculate(encoderL.getPosition());
         double pidOutputR = profiledPIDControllerR.calculate(encoderR.getPosition());
 
         // Add feedforward compensation
-        double feedforwardL = feedForward.calculate(encoderL.getPosition(), encoderL.getVelocity());
-        double feedforwardR = feedForward.calculate(encoderR.getPosition(), encoderR.getVelocity());
+        double feedforwardL = feedForward.calculate(encoderL.getVelocity(), 0.0);
+        double feedforwardR = feedForward.calculate(encoderR.getVelocity(), 0.0);
 
         // Apply the outputs to the motors
         elevatorMotorL.set(pidOutputL + feedforwardL);
         elevatorMotorR.set(pidOutputR + feedforwardR);
     }
+
+    public void tuneKV() {
+        double targetVelocity = 0.5;  // Target velocity in meters per second or appropriate units
+        double kvValue = 0.2;  // Start with an initial guess for kv
+    
+        // Set up the feedforward with the current kv
+        feedForward = new ElevatorFeedforward(-0.15, -0.18, kvValue, 0.0);  // Assuming kg, ks are set
+    
+        // Now, instead of setting a target position, apply a velocity control
+        double feedforwardL = feedForward.calculate(targetVelocity, 0.0);  // Using velocity and acceleration as 0
+        double feedforwardR = feedForward.calculate(targetVelocity, 0.0);
+    
+        // Set the motor velocity directly
+        elevatorMotorL.set(targetVelocity + feedforwardL);  // Apply the feedforward to the motor
+        elevatorMotorR.set(targetVelocity + feedforwardR);
+    
+        // Observe the movement (you may print the velocity or other debug info)
+        System.out.println("Elevator velocity: " + encoderL.getVelocity());
+    
+        // Adjust kv and re-test until you achieve smooth constant velocity
+    }
+
+    public void tuneKA() {
+        double targetVelocity = 0.5;  // Constant velocity (m/s)
+        double targetAcceleration = 0.2;  // Desired acceleration (m/s^2)
+        
+        // Start with an initial guess for ka
+        double kv = 0.2;  
+        double ka = 0.05;  
+        
+        // Set the feedforward with the initial ka value
+        feedForward = new ElevatorFeedforward(-0.15, -0.18, kv, ka);  // Set ka along with kv
+        
+        // Apply feedforward to motors
+        elevatorMotorL.set(feedForward.calculate(targetVelocity, targetAcceleration));
+        elevatorMotorR.set(feedForward.calculate(targetVelocity, targetAcceleration));
+        
+        // Print feedback (velocity and position) for observation
+        System.out.println("Elevator velocity (Left): " + encoderL.getVelocity());
+        System.out.println("Elevator velocity (Right): " + encoderR.getVelocity());
+        
+       
+    }
+    
+
+    
+    
 
     public void setElevatorPosition(double position) {
         elevatorState.position = position;
