@@ -28,8 +28,6 @@ public class DifferentialWrist {
 
 
     public static DifferentialWrist instance;
-    private double target;
-
     // State variables
     private double tiltPosition;       // Current tilt angle (degrees)
     private double rotationPosition;  // Current rotation angle (degrees)
