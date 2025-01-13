@@ -1,4 +1,5 @@
 package frc.robot.subsystems.Wrist;
+
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
@@ -8,10 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-
-
-
-
 
 public class DifferentialWrist {
 
@@ -26,13 +23,19 @@ public class DifferentialWrist {
     private SparkPIDController RPID;
     private SparkPIDController LPID;
 
+    private double motorLOffset ;
+    private double motorROffset ;
 
     public static DifferentialWrist instance;
     // State variables
-    private double tiltPosition;       // Current tilt angle (degrees)
-    private double rotationPosition;  // Current rotation angle (degrees)
+    private double tiltPosition; // Current tilt angle (degrees)
+    private double rotationPosition; // Current rotation angle (degrees)
 
     public DifferentialWrist() {
+
+        motorLOffset = 0;
+        motorROffset = 0;
+        
         tiltPosition = 0.0;
         rotationPosition = 0.0;
 
@@ -66,6 +69,7 @@ public class DifferentialWrist {
         RPID.setFeedbackDevice(encoderR);
         RPID.setOutputRange(-1, 1);
 
+        RightMotor.burnFlash();
 
         LPID = LeftMotor.getPIDController();
 
@@ -75,10 +79,8 @@ public class DifferentialWrist {
         LPID.setFeedbackDevice(encoderL);
         LPID.setOutputRange(-1, 1);
 
-        RightMotor.burnFlash();
         LeftMotor.burnFlash();
 
-        
     }
 
     public void moveWrist(double targetTilt, double targetRotation) {
@@ -99,8 +101,10 @@ public class DifferentialWrist {
         double motorRTarget = motorRCurrent + (targetTilt - currentTilt) + (targetRotation - currentRotation);
 
         // Command the motors to move to the targets
-        LPID.setReference(motorLTarget, CANSparkMax.ControlType.kPosition, 0, feedforward.calculate(encoderL.getPosition(), 0));
-        RPID.setReference(motorRTarget, CANSparkMax.ControlType.kPosition, 0, feedforward.calculate(encoderR.getPosition(), 0));
+        LPID.setReference(motorLTarget, CANSparkMax.ControlType.kPosition, 0,
+                feedforward.calculate(encoderL.getPosition(), 0));
+        RPID.setReference(motorRTarget, CANSparkMax.ControlType.kPosition, 0,
+                feedforward.calculate(encoderR.getPosition(), 0));
 
         // Log data for debugging
         SmartDashboard.putNumber("Tilt Position (Target)", tiltPosition);
@@ -111,52 +115,67 @@ public class DifferentialWrist {
         SmartDashboard.putNumber("Motor R Target", motorRTarget);
     }
 
+    
 
+    public void moveDiffernentialWrist(double targetRotation, double targetTilt) {
+        double motorLTarget = (targetRotation + targetTilt) + motorLOffset;
+        double motorRTarget = (targetRotation - targetTilt) + motorROffset;
+
+        LPID.setReference(motorLTarget, CANSparkMax.ControlType.kPosition, 0,
+                feedforward.calculate(encoderL.getPosition(), 0));
+        RPID.setReference(motorRTarget, CANSparkMax.ControlType.kPosition, 0,
+                feedforward.calculate(encoderR.getPosition(), 0));
+    }
+
+    public void resetOffsets() {
+        motorLOffset = encoderL.getPosition();
+        motorROffset = encoderR.getPosition();
+    }
 
     public void enableCompressor() {
-       
+
     }
-    
+
     public void disableCompressor() {
-       
+
     }
-    public void setWheelsOn(){
+
+    public void setWheelsOn() {
         RightMotor.set(.75);
         LeftMotor.set(.75);
     }
 
-    public void setWheelsReverse(){
+    public void setWheelsReverse() {
         RightMotor.set(-.25);
         LeftMotor.set(-.25);
     }
 
-    public void setWheelsOff(){
+    public void setWheelsOff() {
         RightMotor.set(0.05);
         LeftMotor.set(0.05);
     }
 
     // Method to extend both cylinders
     public void extendCylinders() {
-       
+
     }
 
     // Method to retract both cylinders
     public void retractCylinders() {
-       
+
     }
 
-    public void getSolLNumberF(){
+    public void getSolLNumberF() {
     }
 
-    public void getSolLNumberR(){
+    public void getSolLNumberR() {
     }
 
-     public void getSolRNumberF(){
-     }
-
-     public void getSolRNumberR(){
+    public void getSolRNumberF() {
     }
 
+    public void getSolRNumberR() {
+    }
 
     public static DifferentialWrist getInstance() {
         if (instance == null)
