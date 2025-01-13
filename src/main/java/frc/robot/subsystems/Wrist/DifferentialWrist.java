@@ -17,6 +17,8 @@ public class DifferentialWrist {
 
     private AbsoluteEncoder encoderL;
     private AbsoluteEncoder encoderR;
+    private AbsoluteEncoder encoderMiddle;
+    private AbsoluteEncoder encoderOuter;
 
     private ArmFeedforward feedforward;
 
@@ -55,6 +57,8 @@ public class DifferentialWrist {
 
         encoderR = RightMotor.getAbsoluteEncoder();
         encoderL = LeftMotor.getAbsoluteEncoder();
+        encoderMiddle = RightMotor.getAbsoluteEncoder();
+        encoderOuter = LeftMotor.getAbsoluteEncoder();
 
         encoderR.setPositionConversionFactor(360);
         encoderL.setPositionConversionFactor(360);
@@ -83,7 +87,7 @@ public class DifferentialWrist {
 
     }
 
-    public void moveWrist(double targetTilt, double targetRotation) {
+    public void moveWristOne(double targetTilt, double targetRotation) {
         // Update target positions
         tiltPosition = targetTilt;
         rotationPosition = targetRotation;
@@ -115,17 +119,56 @@ public class DifferentialWrist {
         SmartDashboard.putNumber("Motor R Target", motorRTarget);
     }
 
-    
+    public void moveWristTwo(double targetTilt, double targetRotation) {
+        // Update target positions
+        tiltPosition = targetTilt;
+        rotationPosition = targetRotation;
+        // Read current positions from absolute encoders
+        double middleRotation = encoderMiddle.getPosition(); // Middle gear for rotation
+        double outerGearPosition = encoderOuter.getPosition(); // Outer gear for combined tilt/rotation
+        // Decouple tilt and rotation
+        double currentTilt = outerGearPosition - middleRotation;  // Isolate tilt
+        double currentRotation = middleRotation;  // Direct rotation reading
+        // Calculate motor targets
+        double motorLTarget = (targetTilt - currentTilt) + (targetRotation - currentRotation);
+        double motorRTarget = (targetTilt - currentTilt) - (targetRotation - currentRotation);
+        // Command motors to move to targets
+        LPID.setReference(motorLTarget, CANSparkMax.ControlType.kPosition, 0,
+                feedforward.calculate(encoderOuter.getPosition(), 0));
+        RPID.setReference(motorRTarget, CANSparkMax.ControlType.kPosition, 0,
+                feedforward.calculate(encoderOuter.getPosition(), 0));
+        // Log for debugging
+        SmartDashboard.putNumber("Target Tilt", targetTilt);
+        SmartDashboard.putNumber("Target Rotation", targetRotation);
+        SmartDashboard.putNumber("Current Tilt", currentTilt);
+        SmartDashboard.putNumber("Current Rotation", currentRotation);
+    }
 
-    public void moveDiffernentialWrist(double targetRotation, double targetTilt) {
-        double motorLTarget = (targetRotation + targetTilt) + motorLOffset;
-        double motorRTarget = (targetRotation - targetTilt) + motorROffset;
-
+    public void moveWristThree(double targetTilt, double targetRotation) {
+        // Read current positions from encoders
+        double readL = encoderL.getPosition(); // Left motor encoder
+        double readR = encoderR.getPosition(); // Right motor encoder
+        // Calculate the current pivot (average of the two encoders) and end effector (difference between them)
+        double currentPivot = (readR + readR) / 2;
+        double currentRotation = readL - readR;
+        // Calculate motor targets based on desired tilt and rotation
+        double motorLTarget = targetTilt - currentPivot + targetRotation - currentRotation;
+        double motorRTarget = targetTilt - currentPivot - targetRotation + currentRotation;
+        // Command motors to move to the target positions
         LPID.setReference(motorLTarget, CANSparkMax.ControlType.kPosition, 0,
                 feedforward.calculate(encoderL.getPosition(), 0));
         RPID.setReference(motorRTarget, CANSparkMax.ControlType.kPosition, 0,
                 feedforward.calculate(encoderR.getPosition(), 0));
+        // Log for debugging
+        SmartDashboard.putNumber("Target Tilt", targetTilt);
+        SmartDashboard.putNumber("Target Rotation", targetRotation);
+        SmartDashboard.putNumber("Current Tilt", currentPivot);
+        SmartDashboard.putNumber("Current Rotation", currentRotation);
     }
+    
+
+
+    
 
     public void resetOffsets() {
         motorLOffset = encoderL.getPosition();
